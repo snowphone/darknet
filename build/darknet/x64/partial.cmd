@@ -6,6 +6,10 @@ rem Download Yolo9000: http://pjreddie.com/media/files/yolo9000.weights
 darknet.exe partial cfg/tiny-yolo-voc.cfg tiny-yolo-voc.weights tiny-yolo-voc.conv.13 13
 
 
+darknet.exe partial cfg/tiny-yolo-voc.cfg tiny-yolo-voc.weights tiny-yolo-voc.conv.12 12
+
+
+
 darknet.exe partial cfg/yolo-voc.cfg yolo-voc.weights yolo-voc.conv.23 23
 
 
@@ -21,7 +25,7 @@ darknet.exe partial cfg/densenet201.cfg densenet201.weights densenet201.300 300
 darknet.exe partial cfg/resnet50.cfg resnet50.weights resnet50.65 65
 
 
-darknet.exe partial cfg/resnet152.cfg resnet152.weights resnet152.200 200
+darknet.exe partial cfg/resnet152.cfg resnet152.weights resnet152.201 201
 
 
 pause
