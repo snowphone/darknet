@@ -241,7 +241,7 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
 }
 
 #ifdef OPENCV
-void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes)
+void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes, FILE* fp)
 {
 	int i;
 
@@ -299,7 +299,9 @@ void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, f
 			color.val[2] = blue * 256;
 
 			cvRectangle(show_img, pt1, pt2, color, width, 8, 0);
-			//printf("left=%d, right=%d, top=%d, bottom=%d, obj_id=%d, obj=%s \n", left, right, top, bot, class_id, names[class_id]);
+			//mjo: 박스 정보를 파일에 저장.
+			if(fp)
+				fprintf(fp, "left=%d, right=%d, top=%d, bottom=%d, obj_id=%d, obj=%s\n", left, right, top, bot, class_id, names[class_id]);
 			cvRectangle(show_img, pt_text_bg1, pt_text_bg2, color, width, 8, 0);
 			cvRectangle(show_img, pt_text_bg1, pt_text_bg2, color, CV_FILLED, 8, 0);	// filled
 			CvScalar black_color;

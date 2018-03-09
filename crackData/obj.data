@@ -1,0 +1,6 @@
+classes= 2
+train  = crackData/train.txt
+valid  = crackData/train.txt
+names = crackData/obj.names
+backup = crackBackup
+

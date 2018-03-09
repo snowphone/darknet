@@ -997,13 +997,54 @@ void calc_anchors(char *datacfg, int num_of_clusters, int final_width, int final
 }
 #endif // OPENCV
 
+//mjo: 스트링을 역순으로 검색한다.
+int rfind(const char* str, const char key)
+{
+	size_t length = strlen(str);
+	for(int i = length - 1; i >= 0; --i)
+	{
+		if(str[i] == key)
+			return i;
+	}
+	return -1;
+}
+
+//mjo: 파일_epoch_<epoch 숫자> 형식의 이름을 만든다.
+char* get_output_name(char* dst, char const* src, char const* weight)
+{
+	strcpy(dst, src);	
+	int dot = rfind(src, '.');
+	dst[dot] = 0;
+	strcat(dst, "_epoch_");
+	strcat(dst, weight);
+	return dst;
+}
+//weightfile로 부터 epoch 숫자를 추출하여 스트링으로 반환한다.
+char* getWeight(char* dst, char* str)
+{
+	char* ret = dst;
+	for(char* it= str; *it ; ++it)
+	{
+		if(isdigit(*it))
+		{
+			*dst++ = *it;
+		}
+
+	}
+	*dst = 0;
+	return ret;
+}
+
+
 void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, int dont_show)
 {
     list *options = read_data_cfg(datacfg);
     char *name_list = option_find_str(options, "names", "data/names.list");
     char **names = get_labels(name_list);
 
-    image **alphabet = load_alphabet();
+	//mjo: 함수 작동에 있어서 전혀 쓰이지 않는다.
+    //image **alphabet = load_alphabet();
+    image **alphabet = NULL;
     network net = parse_network_cfg_custom(cfgfile, 1);
     if(weightfile){
         load_weights(&net, weightfile);
@@ -1015,17 +1056,24 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     char *input = buff;
     int j;
     float nms=.4;
+
+	//mjo: 텍스트 파일 열기
+	FILE* fp = fopen(filename, "r");
+
+	//mjo: epoch 숫자 추출
+	puts(weightfile);
+	char epochStr[64] = {0, };
+	getWeight(epochStr, weightfile);
+
     while(1){
-        if(filename){
-            strncpy(input, filename, 256);
-			if (input[strlen(input) - 1] == 0x0d) input[strlen(input) - 1] = 0;
-        } else {
-            printf("Enter Image Path: ");
-            fflush(stdout);
-            input = fgets(input, 256, stdin);
-            if(!input) return;
-            strtok(input, "\n");
-        }
+		//mjo: filename으로부터 이미지명을 하나씩 불러옴.
+		char imageName[512] = {0, };
+		fgets(imageName, 512, fp);
+		if(feof(fp)) break;
+		if (imageName[strlen(imageName) - 1] == '\n') imageName[strlen(imageName) - 1] = 0;
+		strncpy(input, imageName, 256);
+
+
         image im = load_image_color(input,0,0);
         image sized = resize_image(im, net.w, net.h);
         layer l = net.layers[net.n-1];
@@ -1041,9 +1089,12 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0);
         if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         draw_detections(im, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
-        save_image(im, "predictions");
+		char outputName[512];
+		get_output_name(outputName, input, epochStr);
+
+        save_image(im, outputName);
 		if (!dont_show) {
-			show_image(im, "predictions");
+			show_image(im, outputName);
 		}
 
         free_image(im);
@@ -1056,7 +1107,6 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 			cvDestroyAllWindows();
 		}
 #endif
-        if (filename) break;
     }
 }
 
@@ -1108,6 +1158,7 @@ void run_detector(int argc, char **argv)
 	if(weights)
 		if (weights[strlen(weights) - 1] == 0x0d) weights[strlen(weights) - 1] = 0;
     char *filename = (argc > 6) ? argv[6]: 0;
+	//mjo: test detector: filename: 텍스트 파일로, 여기서 이미지 파일을 하나씩 불러옴.
     if(0==strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, dont_show);
     else if(0==strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear, dont_show);
     else if(0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights);

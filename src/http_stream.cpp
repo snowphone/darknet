@@ -38,6 +38,7 @@ struct _INIT_W32DATA
 #endif /* _WIN32 */
 
 #include <vector>
+#include <cstdio>
 #include <iostream>
 using std::cerr;
 using std::endl;

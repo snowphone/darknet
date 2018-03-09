@@ -48,7 +48,7 @@ static image images[FRAMES];
 static IplImage* ipl_images[FRAMES];
 static float *avg;
 
-void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes);
+void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes, FILE* fp);
 void show_image_cv_ipl(IplImage *disp, const char *name);
 image get_image_from_stream_resize(CvCapture *cap, int w, int h, IplImage** in_img);
 IplImage* in_img;
@@ -64,7 +64,7 @@ void *fetch_in_thread(void *ptr)
     if(!in.data){
         //error("Stream closed.");
 		flag_exit = 1;
-		return;
+		return 0;
     }
     //in_s = resize_image(in, net.w, net.h);
 	in_s = make_image(in.w, in.h, in.c);
@@ -75,6 +75,8 @@ void *fetch_in_thread(void *ptr)
 
 void *detect_in_thread(void *ptr)
 {
+	//mjo: void* ptr는 원래는 사용 목적이 없지만, 좌표 저장용 FILE*로 사용할 예정.
+	FILE* fp = (FILE*)ptr;
     float nms = .4;
 
     layer l = net.layers[net.n-1];
@@ -98,6 +100,8 @@ void *detect_in_thread(void *ptr)
     printf("\033[1;1H");
     printf("\nFPS:%.1f\n",fps);
     printf("Objects:\n\n");
+	//mjo: 프레임 구분자: 빈칸
+	fprintf(fp, "\n");
 
     images[demo_index] = det;
     det = images[(demo_index + FRAMES/2 + 1)%FRAMES];
@@ -106,7 +110,7 @@ void *detect_in_thread(void *ptr)
     demo_index = (demo_index + 1)%FRAMES;
 	    
 	//draw_detections(det, l.w*l.h*l.n, demo_thresh, boxes, probs, demo_names, demo_alphabet, demo_classes);
-	draw_detections_cv(det_img, l.w*l.h*l.n, demo_thresh, boxes, probs, demo_names, demo_alphabet, demo_classes);
+	draw_detections_cv(det_img, l.w*l.h*l.n, demo_thresh, boxes, probs, demo_names, demo_alphabet, demo_classes, fp);
 
 	return 0;
 }
@@ -120,14 +124,25 @@ double get_wall_time()
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 
+//mjo: 선수 분류가 가능하도록 선수 및 공의 좌표 정보를 저장할 텍스트 파일을 생성.
+FILE* make_location_file(char* out_filename)
+{
+	char buf[1024] = {0, };
+	strcpy(buf, out_filename);
+	strcat(buf, ".txt");
+	puts(buf);
+	FILE* fp = fopen(buf, "w+");
+	return fp;
+}
+
 void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const char *filename, char **names, int classes, 
 	int frame_skip, char *prefix, char *out_filename, int http_stream_port, int dont_show)
 {
     //skip = frame_skip;
-    image **alphabet = load_alphabet();
+    //image **alphabet = load_alphabet();
     int delay = frame_skip;
     demo_names = names;
-    demo_alphabet = alphabet;
+    //demo_alphabet = alphabet;
     demo_classes = classes;
     demo_thresh = thresh;
     printf("Demo\n");
@@ -136,6 +151,12 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
+	//mjo: 좌표 저장용 파일 생성
+	FILE* fp = make_location_file(out_filename);
+	if(fp)
+	{
+		printf("성공적으로 텍스트 파일을 생성함\n");
+	}
 
     srand(2222222);
 
@@ -168,7 +189,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     det_s = in_s;
 
     fetch_in_thread(0);
-    detect_in_thread(0);
+    detect_in_thread((void*)fp);
     disp = det;
 	det_img = in_img;
     det = in;
@@ -176,7 +197,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 
     for(j = 0; j < FRAMES/2; ++j){
         fetch_in_thread(0);
-        detect_in_thread(0);
+        detect_in_thread((void*)fp);
         disp = det;
 		det_img = in_img;
         det = in;
@@ -198,12 +219,13 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 
 		//const char* output_name = "test_dnn_out.avi";
 		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('H', '2', '6', '4'), 25, size, 1);
-		output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('D', 'I', 'V', 'X'), 25, size, 1);
+		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('D', 'I', 'V', 'X'), 25, size, 1);
 		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('M', 'J', 'P', 'G'), 25, size, 1);
 		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('M', 'P', '4', 'V'), 25, size, 1);
-		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('M', 'P', '4', '2'), 25, size, 1);
+		output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('M', 'P', '4', '2'), 25, size, 1);
 		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('X', 'V', 'I', 'D'), 25, size, 1);
 		//output_video_writer = cvCreateVideoWriter(out_filename, CV_FOURCC('W', 'M', 'V', '2'), 25, size, 1);
+
 	}
 	flag_exit = 0;
 
@@ -213,7 +235,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
         ++count;
         if(1){
             if(pthread_create(&fetch_thread, 0, fetch_in_thread, 0)) error("Thread creation failed");
-            if(pthread_create(&detect_thread, 0, detect_in_thread, 0)) error("Thread creation failed");
+            if(pthread_create(&detect_thread, 0, detect_in_thread, (void*)fp)) error("Thread creation failed");
 
             if(!prefix){
 				if (!dont_show) {
@@ -267,7 +289,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 			det_img = in_img;
             det   = in;
             det_s = in_s;
-            detect_in_thread(0);
+            detect_in_thread((void*)fp);
             if(delay == 0) {
                 free_image(disp);
                 disp = det;
@@ -292,6 +314,8 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 		cvReleaseVideoWriter(&output_video_writer);
 		printf("output_video_writer closed. \n");
 	}
+	//mjo: 텍스트 파일을 닫음.
+	fclose(fp);
 }
 #else
 void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const char *filename, char **names, int classes, int frame_skip, char *prefix, char *out_filename, int http_stream_port, int dont_show)

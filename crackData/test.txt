@@ -1,0 +1,4 @@
+/home/datacenter/APL/yolo/darknet/crackData/test/40%_1_말기_1.jpg
+/home/datacenter/APL/yolo/darknet/crackData/test/40%_1_중기_2.jpg
+/home/datacenter/APL/yolo/darknet/crackData/test/80%_3_최종_2.jpg
+/home/datacenter/APL/yolo/darknet/crackData/test/80%_4_최종_1.jpg

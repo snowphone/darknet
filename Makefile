@@ -1,6 +1,6 @@
-GPU=0
-CUDNN=0
-OPENCV=0
+GPU=1
+CUDNN=1
+OPENCV=1
 DEBUG=0
 OPENMP=0
 LIBSO=0
@@ -36,8 +36,8 @@ LIBNAMESO=darknet.so
 APPNAMESO=uselib
 endif
 
-CC=gcc
-CPP=g++
+CC=clang
+CPP=clang++
 NVCC=nvcc 
 OPTS=-Ofast
 LDFLAGS= -lm -pthread 

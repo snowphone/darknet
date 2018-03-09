@@ -1,0 +1,7 @@
+crackData/img/40%_1_말기_2.jpg
+crackData/img/40%_2_말기_2.jpg
+crackData/img/40%_3_최종_2.jpg
+crackData/img/80%_1_말기_1.jpg
+crackData/img/80%_2_최종_2.jpg
+crackData/img/80%_3_말기_2.jpg
+crackData/img/80%_4_말기_2.jpg
