@@ -16,7 +16,7 @@ class Object
 	friend ostream& operator<<(ostream& os, const Object& obj);
 	friend class Classifier;
 public:
-	enum class Type : char { player, ball, header };
+	enum class Type { player, ball, header };
 	using Ptr = shared_ptr<Object>;
 
 	Object();

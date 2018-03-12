@@ -1,7 +1,12 @@
-﻿  main.cpp
+﻿  Classifier.cpp
+Classifier.cpp(35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+Classifier.cpp(47): warning C4018: '<': signed/unsigned mismatch
+Classifier.cpp(80): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
+Classifier.cpp(89): warning C4267: 'argument': conversion from 'size_t' to 'const int', possible loss of data
+  main.cpp
   Generating code
-  8 of 1159 functions ( 0.7%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
+  61 of 1171 functions ( 5.2%) were compiled, the rest were copied from previous compilation.
+    12 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  classification_cpp.vcxproj -> C:\Users\JunOh\OneDrive - 홍익대학교\APL\object-classification\classification_cpp\x64\Release\classification_cpp.exe
+  classification_cpp.vcxproj -> C:\Users\mjo97\OneDrive - 홍익대학교\APL\darknet\classification_cpp\x64\Release\classification_cpp.exe

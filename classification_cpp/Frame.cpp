@@ -38,11 +38,6 @@ const vector<Object::Ptr>& Frame::ObjectPtrList() const
 
 ostream& operator<<(ostream& os, const Frame& frame)
 {
-	if (frame.IsEmpty())
-	{
-		os << endl;
-		return os;
-	}
 	for(const shared_ptr<Object> objPtr : frame.mList)
 	{
 		os << *objPtr << endl;

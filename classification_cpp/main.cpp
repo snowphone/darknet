@@ -2,13 +2,13 @@
 #include <iostream>
 #include <string>
 #include "Classifier.h"
-#define notTEST
+#define TEST
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
 #ifdef TEST 
-	string path = "../no.txt";
+	string path = "ret.avi.txt";
 #else
 	if (!(argc > 1))
 	{
@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
 	Classifier classifier;
 	classifier.Read(path);
 	classifier.Classify();
+	//classifier.Classify_v2();
 	string output = path.substr(0, path.rfind(".")) + "_cppclassified.txt";
 	classifier.Write(output);
 };

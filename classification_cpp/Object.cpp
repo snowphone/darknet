@@ -14,7 +14,7 @@ Object::Object()
 
 Object::Object(const string & info)
 {
-	regex pattern(R"(left=(\d+), right=(\d+), top=(\d+), bottom=(\d+), obj_id=(\d+).*)");
+	regex pattern(R"(left=(\d+), right=(\d+), top=(\d+), bottom=(\d+), obj_id=(\d+), obj=\w+)");
 	smatch matchResults;
 
 	if (!regex_search(info, matchResults, pattern))
