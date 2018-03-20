@@ -1,0 +1,64 @@
+\documentclass[a4paper,12pt]{article} 
+\usepackage{kotex} 
+\usepackage[figuresright]{rotating} 
+\usepackage{sverb} % to include codes
+\usepackage{fancyhdr}
+\usepackage{indentfirst}
+\usepackage{hyperref}
+
+\pagestyle{fancy}
+\lhead{}
+\rhead{}
+
+\begin{document} 
+\title{darknet YOLO 사용법}
+\author{문준오}
+\date{\today}
+\maketitle
+
+\section{설치}
+pjreddie가 제공하는 darknet은 v1으로, 현재는 업데이트가 멈춰있다. 따라서 v2논문을 반영한 AlexeyAB의 darknet을 기반으로 한다.
+\subsection{Linux}
+\begin{enumerate}
+	\item opencv 설치: \url{https://www.vultr.com/docs/how-to-install-opencv-on-centos-7} 참조.
+	\item git clone https://github.com/snowphone/darknet \&\& cd darknet
+	\item Makefile에서 opencv=1, gpu가 있다면 gpu 옵션을 켜고, cpu를 사용한다면 openmp(멀티 프로세싱)옵션을 켠다.
+	\item mkdir backup (학습중인 가중치 파일을 저장할 곳)
+	\item make
+\end{enumerate}
+
+
+\subsection{Windows}
+\begin{enumerate}
+	\item opencv3 설치: \url{https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.4.0/opencv-3.4.0-vc14\_vc15.exe/download}압축 해제 후 C:\textbackslash opencv3.0\textbackslash 에 복사한다.
+	\item git clone https://github.com/snowphone/darknet \&\& cd darknet
+	\item build 폴더 내에서 그래픽카드 유무에 맞는 .vcxproj를 에디터로 연 후, ToolsVersion="15.0" (vs2017 기준)으로 변경한다.
+	\item 프로젝트를 빌드한다. (Ctrl + Shift + B)
+	\item C:\textbackslash opencv\_3.0\textbackslash opencv\textbackslash build\textbackslash vc15\textbackslash bin\textbackslash에서 opencv\_world340.dll, opencv\_ffmpeg340\_64.dll을 바이너리 파일이 있는 곳에 복사한다.
+\end{enumerate}
+
+\section{사용법}
+\subsection{학습}
+\begin{enumerate}
+	\item cfg/yolo-voc.2.0.cfg 파일을 적당한 위치에 yolo-obj.cfg로 복사
+	\item yolo-obj.cfg 파일 내부에 있는 값을 수정: 
+		\\batch=64
+		\\subdivision = 8
+		\\가장 마지막에 위치한 [convolutional]에서 filters의 값을 (classes + 5) * 5값으로 대입
+		\\classes값도 obj.names에 적은 클래스 개수로 입력
+	\item data폴더에 obj.data, obj.names, train.txt, 학습용 이미지 및 라벨이 들어있는 폴더를 넣음.
+	\item 가중치 파일은 \url{http://pjreddie.com/media/files/darknet19\_448.conv.23} 을 이용
+	\item ./darknet detector train $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ (-dont\_show)를 통해 학습 시작. 100회 단위로 backup폴더에 업데이트된 가중치 파일이 쌓임.
+	\item avg loss값이 크게 변하지 않을 때 까지 지속적으로 학습
+\end{enumerate}
+
+\subsection{탐지}
+\begin{itemize}
+	\item 사진 한 장: AlexeyAB: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image$>$ (-dont\_show) (-thresh [0,1])
+	\item 사진 여러 장: snowphone: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image file list as a text file$>$ (-dont\_show) (-thresh [0,1])
+	\item 영상: ./darknet detector demo $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$video file$>$ -out\_filename $<$output file name$>$ (-dont\_show) (-thresh [0,1])
+\end{itemize}
+
+영상의 경우 라벨이 덧씌워진 영상과 인식한 객체의 좌표가 저장된 텍스트 파일이 생성되고, 이미지 파일의 경우, 파일\_epoch\_숫자.jpg 형식으로 원본 파일 경로에 저장된다.
+
+\end{document}
