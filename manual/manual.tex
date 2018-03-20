@@ -54,9 +54,9 @@ pjreddie가 제공하는 darknet은 v1으로, 현재는 업데이트가 멈춰�
 
 \subsection{탐지}
 \begin{itemize}
-	\item 사진 한 장: AlexeyAB: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image$>$ (-dont\_show)
-	\item 사진 여러 장: snowphone: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image file list as a text file$>$ (-dont\_show)
-	\item 영상: ./darknet detector demo $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$video file$>$ -out\_filename $<$output file name$>$ (-dont\_show)
+	\item 사진 한 장: AlexeyAB: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image$>$ (-dont\_show) (-thresh [0,1])
+	\item 사진 여러 장: snowphone: ./darknet detector test $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$image file list as a text file$>$ (-dont\_show) (-thresh [0,1])
+	\item 영상: ./darknet detector demo $<$.data$>$ $<$.cfg$>$ $<$.weights$>$ $<$video file$>$ -out\_filename $<$output file name$>$ (-dont\_show) (-thresh [0,1])
 \end{itemize}
 
 영상의 경우 라벨이 덧씌워진 영상과 인식한 객체의 좌표가 저장된 텍스트 파일이 생성되고, 이미지 파일의 경우, 파일\_epoch\_숫자.jpg 형식으로 원본 파일 경로에 저장된다.
