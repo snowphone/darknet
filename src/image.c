@@ -240,6 +240,24 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
     }
 }
 
+//mjo: 좌표를 기록하는데 필요한 정보를 저장하는 구조체.
+struct BoxData{
+	int left,
+		right,
+		top,
+		bottom,
+		obj_id;
+	const char* obj;
+}BoxData;
+
+
+//mjo: 좌표 정보를 파일에 기록한다.
+void write_log(FILE* fp, const BoxData* data)
+{
+	fprintf(fp, "left=%d, right=%d, top=%d, bottom=%d, obj_id=%d, obj=%s\n", 
+			data->left, data->right, data->top, data->bottom, data->obj_id, data->obj);
+}
+
 #ifdef OPENCV
 void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes, FILE* fp)
 {
@@ -299,9 +317,13 @@ void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, f
 			color.val[2] = blue * 256;
 
 			cvRectangle(show_img, pt1, pt2, color, width, 8, 0);
-			//mjo: 박스 정보를 파일에 저장.
+
+			//mjo: 박스 정보를 파일에 저장하는 코드
 			if(fp)
-				fprintf(fp, "left=%d, right=%d, top=%d, bottom=%d, obj_id=%d, obj=%s\n", left, right, top, bot, class_id, names[class_id]);
+			{
+				struct BoxData boxData = {left, right, top, bot, class_id, names[class_id]};
+				write_log(fp, &boxData);
+			}
 			cvRectangle(show_img, pt_text_bg1, pt_text_bg2, color, width, 8, 0);
 			cvRectangle(show_img, pt_text_bg1, pt_text_bg2, color, CV_FILLED, 8, 0);	// filled
 			CvScalar black_color;
